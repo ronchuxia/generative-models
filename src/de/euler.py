@@ -18,7 +18,7 @@ class Euler:
         Returns:
             The location at time t + h. Shape (b, d).
         """
-        return x + h * self.ode.u(x, t)
+        return x + h[:, None] * self.ode.u(x, t)
 
     def simulate_trajectory(self, x0: torch.Tensor, t: torch.Tensor, whole: bool = False) -> torch.Tensor:
         """
