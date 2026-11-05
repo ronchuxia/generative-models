@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 import torch
 
 
-class SDE:
+class SDE(ABC):
     @abstractmethod
     def u(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         """
