@@ -33,7 +33,7 @@ class GaussianOTFlowMatchingTrainer(Trainer):
         # Predict ut_pred(xt)
         ut_pred = self.model(xt, t)
 
-        # Compute ut_cond(xt|zt)
+        # Compute ut_cond(xt|z)
         ut_cond = z - epsilon
 
         # Compute loss
@@ -46,4 +46,50 @@ class GaussianOTFlowMatchingTrainer(Trainer):
 
         # Log
         progress.set_postfix(loss=f"{loss.item():.2f}")
-        wandb.log({'loss': loss}, step, commit=True)
+        if self.log:
+            wandb.log({'loss': loss}, step, commit=True)
+
+
+class OTFlowMatchingTrainer(Trainer):
+    def __init__(self, model: nn.Module, dataset: Dataset, config: dict) -> None:
+        super().__init__(model, dataset, config)
+
+    def train_iter(self, batch: tuple, progress: tqdm, step: int) -> None:
+        """
+        Train one iteration.
+
+        Args:
+            batch: (x, z). A batch of source points x with shape (b, ...), and target points z with shape (b, ...).
+        """
+        x = batch[0]
+        z = batch[1]
+        b = z.shape[0]
+        dim = len(z.shape)
+
+        z = z.to(self.device)
+        x = x.to(self.device)
+
+        # Sample t
+        t = torch.rand((b,), device=self.device).reshape((b,) + (1,) * (dim - 1))   # shape (b, 1, 1, ...)
+
+        # Sample xt
+        xt = t * z + (1 - t) * x  # shape (b, ...)
+
+        # Predict ut_pred(xt)
+        ut_pred = self.model(xt, t)
+
+        # Compute ut_cond(xt|z,x)
+        ut_cond = z - x
+
+        # Compute loss
+        loss = torch.sum((ut_pred - ut_cond)**2) / b
+
+        # Optimization step
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+
+        # Log
+        progress.set_postfix(loss=f"{loss.item():.2f}")
+        if self.log:
+            wandb.log({'loss': loss}, step, commit=True)
