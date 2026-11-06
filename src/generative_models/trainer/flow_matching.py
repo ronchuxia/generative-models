@@ -3,13 +3,14 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from tqdm import tqdm
+import wandb
 
 
 class GaussianOTFlowMatchingTrainer(Trainer):
     def __init__(self, model: nn.Module, dataset: Dataset, config: dict) -> None:
         super().__init__(model, dataset, config)
 
-    def train_iter(self, batch: tuple, progress: tqdm) -> None:
+    def train_iter(self, batch: tuple, progress: tqdm, step: int) -> None:
         """
         Train one iteration.
 
@@ -45,3 +46,4 @@ class GaussianOTFlowMatchingTrainer(Trainer):
 
         # Log
         progress.set_postfix(loss=f"{loss.item():.2f}")
+        wandb.log({'loss': loss}, step, commit=True)
