@@ -1,4 +1,4 @@
-from .ode import LinearVectorFieldODE
+from .ode import LinearVectorFieldODE, NeuralODE
 from .euler import Euler
 
 from .sde import WienerProcessSDE, OUProcessSDE

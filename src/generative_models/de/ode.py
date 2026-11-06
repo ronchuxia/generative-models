@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 import torch
+import torch.nn as nn
 
 
 class ODE(ABC):
@@ -41,3 +42,12 @@ class LinearVectorFieldODE(ODE):
 
     def flow(self, x0: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
         return torch.exp(- self.theta * t)[:, :, None] * x0[:, None, :]
+
+
+class NeuralODE(ODE):
+    def __init__(self, model: nn.Module) -> None:
+        super().__init__()
+        self.model = model
+
+    def u(self, x: torch.Tensor, t: torch.Tensor) -> torch.Tensor:
+        return self.model(x, t[:, None])
