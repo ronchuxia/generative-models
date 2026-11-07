@@ -1,1 +1,1 @@
-from .flow_matching import GaussianOTFlowMatchingTrainer, OTFlowMatchingTrainer
+from .flow_matching import GaussianOTFlowMatchingTrainer, OTFlowMatchingTrainer, FlowMatchingTrainer
