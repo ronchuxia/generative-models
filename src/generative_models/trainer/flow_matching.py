@@ -47,7 +47,8 @@ class GaussianOTFlowMatchingTrainer(Trainer):
         # Log
         progress.set_postfix(loss=f"{loss.item():.2f}")
         if self.log:
-            wandb.log({'loss': loss}, step, commit=True)
+            lr = self.optimizer.param_groups[0]["lr"]
+            wandb.log({'loss': loss, 'lr': lr}, step)
 
 
 class OTFlowMatchingTrainer(Trainer):
@@ -92,4 +93,5 @@ class OTFlowMatchingTrainer(Trainer):
         # Log
         progress.set_postfix(loss=f"{loss.item():.2f}")
         if self.log:
-            wandb.log({'loss': loss}, step, commit=True)
+            lr = self.optimizer.param_groups[0]["lr"]
+            wandb.log({'loss': loss, 'lr': lr}, step)

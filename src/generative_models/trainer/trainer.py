@@ -5,6 +5,7 @@ from torch.optim import AdamW
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 import wandb
+from torch.optim.lr_scheduler import CosineAnnealingLR
 
 
 class Trainer(ABC):
@@ -22,12 +23,14 @@ class Trainer(ABC):
         self.project = self.config['project']
         self.name = self.config['name']
 
-        # Prepare model, dataloader and optimizer
+        # Prepare model, dataloader, optimizer and lr scheduler
         self.model.to(self.device)
 
         self.dataloader = DataLoader(self.dataset, self.batch_size, shuffle=True)
 
         self.optimizer = AdamW(self.model.parameters(), self.lr)
+
+        self.scheduler = CosineAnnealingLR(self.optimizer, T_max=self.total_steps)
 
         # Initialize wandb
         if self.log:
@@ -47,6 +50,8 @@ class Trainer(ABC):
                 batch = next(dataloader_iter)
 
             self.train_iter(batch, progress, step)
+
+            self.scheduler.step()
 
     @abstractmethod
     def train_iter(self, batch: tuple, progress: tqdm, step: int) -> None:
